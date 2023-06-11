@@ -1,15 +1,34 @@
+
 import flatpickr from "flatpickr";
+
 import "flatpickr/dist/flatpickr.min.css";
 import Notiflix from "notiflix";
 
-const startBtn = document.querySelector('[data-start]');
+const dateTimePicker = document.querySelector("#datetime-picker");
 
-const daysEnd = document.querySelector('[data-days]');
-const hoursEnd = document.querySelector('[data-hours]');
-const minutesEnd = document.querySelector('[data-minutes]');
-const secondsEnd = document.querySelector('[data-seconds]');
+const startButton = document.querySelector("[data-start]");
 
-let countdownIntervalId;
+const daysValue = document.querySelector("[data-days]");
+const hoursValue = document.querySelector("[data-hours]");
+const minutesValue = document.querySelector("[data-minutes]");
+const secondsValue = document.querySelector("[data-seconds]");
+
+flatpickr("#datetime-picker", {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    const selectedDate = selectedDates[0];
+
+    if (selectedDate <= new Date()) {
+      Notiflix.Notify.failure("Прошу обрати майбутній час до якого слід застосувати відлік");
+      startButton.disabled = true;
+    } else {
+      startButton.disabled = false;
+    }
+  },
+});
 
 function convertMs(ms) {
   const second = 1000;
@@ -26,51 +45,50 @@ function convertMs(ms) {
 }
 
 function addLeadingZero(value) {
-  return value.toString().padStart(2, '0');
+  return value.toString().padStart(2, "0");
 }
 
-flatpickr("#datetime-picker", {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    const selectedDate = selectedDates[0];
+let countdownInterval;
 
-    if (selectedDate < new Date()) {
-      Notiflix.Notify.warning("Please choose a date in the future");
-      startBtn.disabled = true;
-    } else {
-      startBtn.disabled = false;
-    }
-  },
-});
+function startCountdown() {
+  clearInterval(countdownInterval);
 
-startBtn.addEventListener('click', () => {
-  const selectedDate = flatpickr.parseDate(document.getElementById('datetime-picker').value);
-  const currentDate = new Date();
-  const timeDifference = selectedDate.getTime() - currentDate.getTime();
+  const selectedDate = dateTimePicker.value;
+  const endDate = new Date(selectedDate).getTime();
+  const currentDate = new Date().getTime();
+  const remainingTime = endDate - currentDate;
 
-  if (timeDifference <= 0) {
-    Notiflix.Notify.warning("Please choose a date in the future");
+  if (remainingTime <= 0) {
+    Notiflix.Notify.failure("Прошу обрати майбутній час до якого слід застосувати відлік");
     return;
   }
+ 
+  countdownInterval = setInterval(() => {
+    const currentTime = new Date().getTime();
+    const remainingTime = endDate - currentTime;
 
-  startBtn.disabled = true;
-
-  countdownIntervalId = setInterval(() => {
-    const { days, hours, minutes, seconds } = convertMs(timeDifference);
-
-    daysEnd.textContent = addLeadingZero(days);
-    hoursEnd.textContent = addLeadingZero(hours);
-    minutesEnd.textContent = addLeadingZero(minutes);
-    secondsEnd.textContent = addLeadingZero(seconds);
-
-    timeDifference -= 1000;
-
-    if (timeDifference < 0) {
-      clearInterval(countdownIntervalId);
-      startBtn.disabled = false;
+    if (remainingTime <= 0) {
+      clearInterval(countdownInterval);
+      updateTimerDisplay(convertMs(0));
+      Notiflix.Notify.success("Лічильник завершено!");
+      return;
     }
+
+    const time = convertMs(remainingTime);
+    updateTimerDisplay(time);
   }, 1000);
+}
+
+function updateTimerDisplay(time) {
+  daysValue.textContent = addLeadingZero(time.days);
+  hoursValue.textContent = addLeadingZero(time.hours);
+  minutesValue.textContent = addLeadingZero(time.minutes);
+  secondsValue.textContent = addLeadingZero(time.seconds);
+}
+
+
+
+startButton.addEventListener("click", () => {
+  startCountdown();
+  startButton.disabled = true;
 });

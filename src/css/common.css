@@ -10,7 +10,8 @@ body {
   background-color: #fafafa;
   color: #212121;
   line-height: 1.5;
-  
+
+ 
 }
 
 img {
@@ -21,6 +22,29 @@ img {
 .button-container {
   text-align: center;
 
+}
+
+
+.timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 60px;
+  color: rgb(114, 82, 82);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.field {
+  margin: 0 10px;
+  text-align: center;
+}
+
+.value {
+  font-weight: bold;
+}
+
+.label {
+  font-size: 20px;
 }
 
 
