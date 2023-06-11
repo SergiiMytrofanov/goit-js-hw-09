@@ -10,9 +10,17 @@ body {
   background-color: #fafafa;
   color: #212121;
   line-height: 1.5;
+  
 }
 
 img {
   display: block;
   max-width: 100%;
 }
+
+.button-container {
+  text-align: center;
+
+}
+
+
